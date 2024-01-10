@@ -1,25 +1,25 @@
-import logging
-
 import discord
 from discord.ext import commands
-from dotenv import dotenv_values
+from colorama import Back, Fore, Style
+import time
 
 class OrganAttackBot(commands.Bot):
-    def __init__(self, *, intents: discord.Intents):
+    def __init__(self, intents: discord.Intents):
         super().__init__(command_prefix=commands.when_mentioned_or('.'), intents=intents)
 
-        self.cogs_list = ["GameInitializationCog", ""]
-
     async def setup_hook(self):
-        self.tree.copy_global_to(guild=MY_GUILD)
-        # await self.tree.sync(guild=MY_GUILD)
-        for ext in self.cogs_list:
-            await self.load_extension(ext)
+        # for ext in self.cogs_list:
+        print(f"Setting up Game.GameInitializationCog...")
+        await self.load_extension("Game.GameInitializationCog")
 
-config = dotenv_values(".env")['ORGAN_ATTACK_BOT_TOKEN']
-handler = logging.FileHandler(filename='discord.log', encoding='utf-8', mode='w')
-MY_GUILD = discord.Object(id=706518159984951337)
-log_level = logging.DEBUG
+    async def on_ready(self):
+        color_config = (Back.BLACK + Fore.GREEN + time.strftime("%H:%M:%S UTC", time.gmtime())
+                        + Back.RESET + Fore.WHITE + Style.BRIGHT + " [OrganAttackBot]")
+        print(color_config + " Logged in as " + Fore.YELLOW + self.user.name)
+        print(color_config + " Bot ID " + Fore.YELLOW + str(self.user.id))
+        synced = await self.tree.sync()
+        print(color_config + " Slash CMDs Synced " + Fore.YELLOW + str(len(synced)) + " Commands" + Style.RESET_ALL)
 
 intents_config = discord.Intents.all()
+
 bot = OrganAttackBot(intents=intents_config)
